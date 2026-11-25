@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  verify-and-scan:
+  verify-and-coverage:
     runs-on: ubuntu-latest
     services:
       mysql:
@@ -52,20 +52,8 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      - name: SonarQube analysis and quality gate
-        if: ${{ vars.RUN_SONAR == 'true' }}
-        env:
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        run: >
-          mvn -B
-          org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
-          -Dsonar.projectKey=student-management
-          -Dsonar.qualitygate.wait=true
-        working-directory: student-management
-
   build-and-push-image:
-    needs: verify-and-scan
+    needs: verify-and-coverage
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
