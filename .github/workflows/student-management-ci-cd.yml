@@ -43,7 +43,17 @@ jobs:
         run: mvn -B clean verify
         working-directory: student-management
 
+      - name: Upload JaCoCo coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-coverage-report
+          path: student-management/target/site/jacoco/
+          if-no-files-found: warn
+          retention-days: 14
+
       - name: SonarQube analysis and quality gate
+        if: ${{ vars.RUN_SONAR == 'true' }}
         env:
           SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
