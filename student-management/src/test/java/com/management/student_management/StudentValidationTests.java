@@ -33,6 +33,36 @@ class StudentValidationTests {
         }
     }
 
+    @Test
+    void rejectsBlankRequiredFields() {
+        Student student = createStudent(" ", " ");
+        student.setCourse(" ");
+
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            Set<String> invalidFields = factory.getValidator().validate(student).stream()
+                    .map(violation -> violation.getPropertyPath().toString())
+                    .collect(Collectors.toSet());
+
+            assertThat(invalidFields).contains("name", "email", "course");
+        }
+    }
+
+    @Test
+    void rejectsNamesAndEmailsThatExceedTheirMaximumLengths() {
+        Student student = createStudent(
+                "A".repeat(101),
+                "a".repeat(245) + "@example.com"
+        );
+
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            Set<String> invalidFields = factory.getValidator().validate(student).stream()
+                    .map(violation -> violation.getPropertyPath().toString())
+                    .collect(Collectors.toSet());
+
+            assertThat(invalidFields).contains("name", "email");
+        }
+    }
+
     private Student createStudent(String name, String email) {
         Student student = new Student();
         student.setName(name);
